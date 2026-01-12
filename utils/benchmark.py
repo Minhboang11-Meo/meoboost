@@ -4,6 +4,15 @@ import subprocess
 
 _results = {}
 
+def refresh_screen():
+    try:
+        user32 = ctypes.windll.user32
+        user32.InvalidateRect(0, None, True)
+        user32.UpdateWindow(user32.GetDesktopWindow())
+        ctypes.windll.gdi32.GdiFlush()
+    except:
+        pass
+
 def measure_latency():
     try:
         k32 = ctypes.windll.kernel32
@@ -104,9 +113,6 @@ def get_comparison():
 
 def run_fps_benchmark(duration=10):
     try:
-        import ctypes
-        from ctypes import wintypes
-        
         gdi32 = ctypes.windll.gdi32
         user32 = ctypes.windll.user32
         
@@ -129,6 +135,7 @@ def run_fps_benchmark(duration=10):
             frames += 1
         
         user32.ReleaseDC(0, hdc)
+        refresh_screen()
         
         elapsed = time.time() - start
         fps = frames / elapsed
@@ -140,15 +147,18 @@ def run_fps_benchmark(duration=10):
             "score": int(fps * 10)
         }
     except Exception as e:
+        refresh_screen()
         return {"fps": 0, "frames": 0, "duration": 0, "score": 0, "error": str(e)}
 
 def run_stress_test(duration=30):
     try:
         import threading
         import math
+        import os
         
         results = {"cpu_ops": 0, "completed": False}
         stop_flag = [False]
+        lock = threading.Lock()
         
         def cpu_work():
             ops = 0
@@ -156,10 +166,10 @@ def run_stress_test(duration=30):
                 for i in range(1000):
                     _ = math.sqrt(i * 3.14159) * math.sin(i)
                 ops += 1000
-            results["cpu_ops"] = ops
+            with lock:
+                results["cpu_ops"] += ops
         
         threads = []
-        import os
         cores = os.cpu_count() or 4
         
         for _ in range(cores):
@@ -181,9 +191,6 @@ def run_stress_test(duration=30):
 
 def run_gpu_benchmark(duration=15):
     try:
-        import ctypes
-        import threading
-        
         gdi32 = ctypes.windll.gdi32
         user32 = ctypes.windll.user32
         
@@ -236,6 +243,7 @@ def run_gpu_benchmark(duration=15):
         gdi32.DeleteObject(hbrush)
         gdi32.DeleteObject(hpen)
         user32.ReleaseDC(0, hdc)
+        refresh_screen()
         
         elapsed = time.time() - start
         fps = frames / elapsed
@@ -249,6 +257,7 @@ def run_gpu_benchmark(duration=15):
             "score": int(fps * 15 + rects / 100)
         }
     except Exception as e:
+        refresh_screen()
         return {"fps": 0, "frames": 0, "rectangles": 0, "pixels": 0, "duration": 0, "score": 0, "error": str(e)}
 
 def clear():

@@ -440,6 +440,8 @@ def menu_benchmark():
         logo()
         console.print(f"[{C1}]─── {t('menu_benchmark')} ───[/]", justify="center")
         console.print()
+        console.print(f"[{DIM}]⚠ Lưu ý: Các chấm/hình trên màn hình là do benchmark, tự động xóa sau khi xong[/]")
+        console.print()
         console.print(f"[{C2}][1][/] System Benchmark (Before)")
         console.print(f"[{C2}][2][/] System Benchmark (After)")
         console.print(f"[{C2}][3][/] Compare Before/After")
