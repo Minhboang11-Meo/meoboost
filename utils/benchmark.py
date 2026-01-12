@@ -102,6 +102,83 @@ def get_comparison():
         "dpc": {"before": b["dpc_pct"], "after": a["dpc_pct"], "diff": round(dpc_diff, 2)}
     }
 
+def run_fps_benchmark(duration=10):
+    try:
+        import ctypes
+        from ctypes import wintypes
+        
+        gdi32 = ctypes.windll.gdi32
+        user32 = ctypes.windll.user32
+        
+        hdc = user32.GetDC(0)
+        width = user32.GetSystemMetrics(0)
+        height = user32.GetSystemMetrics(1)
+        
+        frames = 0
+        start = time.time()
+        
+        while time.time() - start < duration:
+            for i in range(10):
+                x = (frames * 7) % width
+                y = (frames * 11) % height
+                color = (frames * 13) % 0xFFFFFF
+                
+                gdi32.SetPixel(hdc, x, y, color)
+                gdi32.Rectangle(hdc, x, y, x + 50, y + 50)
+            
+            frames += 1
+        
+        user32.ReleaseDC(0, hdc)
+        
+        elapsed = time.time() - start
+        fps = frames / elapsed
+        
+        return {
+            "fps": round(fps, 1),
+            "frames": frames,
+            "duration": round(elapsed, 2),
+            "score": int(fps * 10)
+        }
+    except Exception as e:
+        return {"fps": 0, "frames": 0, "duration": 0, "score": 0, "error": str(e)}
+
+def run_stress_test(duration=30):
+    try:
+        import threading
+        import math
+        
+        results = {"cpu_ops": 0, "completed": False}
+        stop_flag = [False]
+        
+        def cpu_work():
+            ops = 0
+            while not stop_flag[0]:
+                for i in range(1000):
+                    _ = math.sqrt(i * 3.14159) * math.sin(i)
+                ops += 1000
+            results["cpu_ops"] = ops
+        
+        threads = []
+        import os
+        cores = os.cpu_count() or 4
+        
+        for _ in range(cores):
+            t = threading.Thread(target=cpu_work)
+            t.start()
+            threads.append(t)
+        
+        time.sleep(duration)
+        stop_flag[0] = True
+        
+        for t in threads:
+            t.join()
+        
+        results["completed"] = True
+        results["score"] = results["cpu_ops"] // 1000
+        return results
+    except Exception as e:
+        return {"cpu_ops": 0, "completed": False, "error": str(e)}
+
 def clear():
     global _results
     _results = {}

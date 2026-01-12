@@ -93,7 +93,8 @@ def main():
             f"[{C2}][2][/] {t('menu_deep_optimize')}",
             f"[{C2}][3][/] {t('menu_privacy')}",
             f"[{C2}][4][/] {t('menu_tools')}",
-            f"[{C2}][5][/] {t('menu_language')} [{DIM}]{get_lang().upper()}[/]",
+            f"[{C2}][5][/] {t('menu_benchmark')}",
+            f"[{C2}][6][/] {t('menu_language')} [{DIM}]{get_lang().upper()}[/]",
             f"[{ERR}][X][/] {t('menu_exit')}",
         ]
         tbl = Table(show_header=False, box=None, expand=True, padding=(1, 3))
@@ -108,7 +109,8 @@ def main():
         elif ch == "2": menu_deep_optimize()
         elif ch == "3": menu_privacy()
         elif ch == "4": menu_tools()
-        elif ch == "5": menu_lang()
+        elif ch == "5": menu_benchmark()
+        elif ch == "6": menu_lang()
         elif ch.lower() == "x": break
 
 
@@ -388,9 +390,8 @@ def menu_tools():
             item("4", "audio", misc.is_audio_latency_on()),
             item("5", "w32", False),
             item("6", "backup", False),
-            item("7", "benchmark", False),
-            item("8", "export_settings", False),
-            item("9", "import_settings", False),
+            item("7", "export_settings", False),
+            item("8", "import_settings", False),
         ]
         grid(items, 3)
         footer()
@@ -403,9 +404,8 @@ def menu_tools():
         elif ch == "4": do(misc.toggle_audio_latency)
         elif ch == "5": ui_w32()
         elif ch == "6": do(backup.full_backup)
-        elif ch == "7": ui_benchmark()
-        elif ch == "8": ui_export_settings()
-        elif ch == "9": ui_import_settings()
+        elif ch == "7": ui_export_settings()
+        elif ch == "8": ui_import_settings()
 
 
 def ui_game_boost():
@@ -434,45 +434,74 @@ def ui_w32():
     inp()
 
 
-def ui_benchmark():
+def menu_benchmark():
     from utils import benchmark
-    logo()
-    console.print(f"[{C1}]─── Benchmark ───[/]", justify="center")
-    console.print()
-    console.print(f"[{C2}][1][/] Run Before Benchmark")
-    console.print(f"[{C2}][2][/] Run After Benchmark")
-    console.print(f"[{C2}][3][/] Show Comparison")
-    footer()
-    ch = inp()
-    if ch == "1":
-        console.print(f"\n[{WARN}]⏳ Running benchmark...[/]")
-        r = benchmark.save_before()
-        console.print(f"\n[{OK}]Before Results:[/]")
-        console.print(f"  Latency: {r['latency_ms']}ms")
-        console.print(f"  Memory Free: {r['memory']['avail_mb']}MB")
-        console.print(f"  DPC Time: {r['dpc_pct']}%")
-        inp()
-    elif ch == "2":
-        console.print(f"\n[{WARN}]⏳ Running benchmark...[/]")
-        r = benchmark.save_after()
-        console.print(f"\n[{OK}]After Results:[/]")
-        console.print(f"  Latency: {r['latency_ms']}ms")
-        console.print(f"  Memory Free: {r['memory']['avail_mb']}MB")
-        console.print(f"  DPC Time: {r['dpc_pct']}%")
-        inp()
-    elif ch == "3":
-        cmp = benchmark.get_comparison()
-        if cmp:
-            console.print(f"\n[{C1}]Comparison:[/]")
-            lat = cmp['latency']
-            console.print(f"  Latency: {lat['before']}ms → {lat['after']}ms ({'+' if lat['diff'] >= 0 else ''}{lat['diff']}ms)")
-            mem = cmp['memory_free']
-            console.print(f"  Memory Free: {mem['before']}MB → {mem['after']}MB ({'+' if mem['diff'] >= 0 else ''}{mem['diff']}MB)")
-            dpc = cmp['dpc']
-            console.print(f"  DPC Time: {dpc['before']}% → {dpc['after']}% ({'+' if dpc['diff'] >= 0 else ''}{dpc['diff']}%)")
-        else:
-            console.print(f"[{ERR}]Run Before and After benchmarks first![/]")
-        inp()
+    while True:
+        logo()
+        console.print(f"[{C1}]─── {t('menu_benchmark')} ───[/]", justify="center")
+        console.print()
+        console.print(f"[{C2}][1][/] System Benchmark (Before)")
+        console.print(f"[{C2}][2][/] System Benchmark (After)")
+        console.print(f"[{C2}][3][/] Compare Before/After")
+        console.print(f"[{C2}][4][/] FPS Benchmark (10s)")
+        console.print(f"[{C2}][5][/] CPU Stress Test (30s)")
+        footer()
+        
+        ch = inp()
+        if ch.lower() == "b": break
+        elif ch.lower() == "x": sys.exit(0)
+        elif ch == "1":
+            console.print(f"\n[{WARN}]⏳ Running system benchmark...[/]")
+            r = benchmark.save_before()
+            console.print(f"\n[{OK}]━━━ BEFORE Results ━━━[/]")
+            console.print(f"  Timer Latency: [{C1}]{r['latency_ms']}ms[/]")
+            console.print(f"  Memory Free: [{C1}]{r['memory']['avail_mb']}MB[/]")
+            console.print(f"  DPC Time: [{C1}]{r['dpc_pct']}%[/]")
+            inp()
+        elif ch == "2":
+            console.print(f"\n[{WARN}]⏳ Running system benchmark...[/]")
+            r = benchmark.save_after()
+            console.print(f"\n[{OK}]━━━ AFTER Results ━━━[/]")
+            console.print(f"  Timer Latency: [{C1}]{r['latency_ms']}ms[/]")
+            console.print(f"  Memory Free: [{C1}]{r['memory']['avail_mb']}MB[/]")
+            console.print(f"  DPC Time: [{C1}]{r['dpc_pct']}%[/]")
+            inp()
+        elif ch == "3":
+            cmp = benchmark.get_comparison()
+            if cmp:
+                console.print(f"\n[{C1}]━━━ COMPARISON ━━━[/]")
+                lat = cmp['latency']
+                diff_color = OK if lat['diff'] >= 0 else ERR
+                console.print(f"  Latency: {lat['before']}ms → {lat['after']}ms [{diff_color}]({'+' if lat['diff'] >= 0 else ''}{lat['diff']}ms)[/]")
+                mem = cmp['memory_free']
+                diff_color = OK if mem['diff'] >= 0 else ERR
+                console.print(f"  Memory: {mem['before']}MB → {mem['after']}MB [{diff_color}]({'+' if mem['diff'] >= 0 else ''}{mem['diff']}MB)[/]")
+                dpc = cmp['dpc']
+                diff_color = OK if dpc['diff'] >= 0 else ERR
+                console.print(f"  DPC: {dpc['before']}% → {dpc['after']}% [{diff_color}]({'+' if dpc['diff'] >= 0 else ''}{dpc['diff']}%)[/]")
+            else:
+                console.print(f"[{ERR}]Run Before and After benchmarks first![/]")
+            inp()
+        elif ch == "4":
+            console.print(f"\n[{WARN}]⏳ Running FPS benchmark (10s)...[/]")
+            console.print(f"[{DIM}]Drawing on screen...[/]")
+            r = benchmark.run_fps_benchmark(10)
+            console.print(f"\n[{OK}]━━━ FPS BENCHMARK ━━━[/]")
+            console.print(f"  FPS: [{C1}]{r['fps']}[/]")
+            console.print(f"  Frames: [{C1}]{r['frames']}[/]")
+            console.print(f"  Duration: [{C1}]{r['duration']}s[/]")
+            console.print(f"  Score: [{C3}]{r['score']}[/]")
+            inp()
+        elif ch == "5":
+            console.print(f"\n[{WARN}]⏳ Running CPU stress test (30s)...[/]")
+            console.print(f"[{DIM}]This will use 100% CPU![/]")
+            r = benchmark.run_stress_test(30)
+            console.print(f"\n[{OK}]━━━ CPU STRESS TEST ━━━[/]")
+            console.print(f"  Operations: [{C1}]{r.get('cpu_ops', 0):,}[/]")
+            console.print(f"  Score: [{C3}]{r.get('score', 0)}[/]")
+            if r.get('completed'):
+                console.print(f"  Status: [{OK}]Completed[/]")
+            inp()
 
 
 def ui_export_settings():
