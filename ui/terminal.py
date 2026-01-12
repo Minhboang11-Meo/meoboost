@@ -388,6 +388,9 @@ def menu_tools():
             item("4", "audio", misc.is_audio_latency_on()),
             item("5", "w32", False),
             item("6", "backup", False),
+            item("7", "benchmark", False),
+            item("8", "export_settings", False),
+            item("9", "import_settings", False),
         ]
         grid(items, 3)
         footer()
@@ -400,6 +403,9 @@ def menu_tools():
         elif ch == "4": do(misc.toggle_audio_latency)
         elif ch == "5": ui_w32()
         elif ch == "6": do(backup.full_backup)
+        elif ch == "7": ui_benchmark()
+        elif ch == "8": ui_export_settings()
+        elif ch == "9": ui_import_settings()
 
 
 def ui_game_boost():
@@ -425,6 +431,80 @@ def ui_w32():
     elif ch == "2":
         misc.set_w32_priority(40)
         console.print(f"[{OK}]✓[/]")
+    inp()
+
+
+def ui_benchmark():
+    from utils import benchmark
+    logo()
+    console.print(f"[{C1}]─── Benchmark ───[/]", justify="center")
+    console.print()
+    console.print(f"[{C2}][1][/] Run Before Benchmark")
+    console.print(f"[{C2}][2][/] Run After Benchmark")
+    console.print(f"[{C2}][3][/] Show Comparison")
+    footer()
+    ch = inp()
+    if ch == "1":
+        console.print(f"\n[{WARN}]⏳ Running benchmark...[/]")
+        r = benchmark.save_before()
+        console.print(f"\n[{OK}]Before Results:[/]")
+        console.print(f"  Latency: {r['latency_ms']}ms")
+        console.print(f"  Memory Free: {r['memory']['avail_mb']}MB")
+        console.print(f"  DPC Time: {r['dpc_pct']}%")
+        inp()
+    elif ch == "2":
+        console.print(f"\n[{WARN}]⏳ Running benchmark...[/]")
+        r = benchmark.save_after()
+        console.print(f"\n[{OK}]After Results:[/]")
+        console.print(f"  Latency: {r['latency_ms']}ms")
+        console.print(f"  Memory Free: {r['memory']['avail_mb']}MB")
+        console.print(f"  DPC Time: {r['dpc_pct']}%")
+        inp()
+    elif ch == "3":
+        cmp = benchmark.get_comparison()
+        if cmp:
+            console.print(f"\n[{C1}]Comparison:[/]")
+            lat = cmp['latency']
+            console.print(f"  Latency: {lat['before']}ms → {lat['after']}ms ({'+' if lat['diff'] >= 0 else ''}{lat['diff']}ms)")
+            mem = cmp['memory_free']
+            console.print(f"  Memory Free: {mem['before']}MB → {mem['after']}MB ({'+' if mem['diff'] >= 0 else ''}{mem['diff']}MB)")
+            dpc = cmp['dpc']
+            console.print(f"  DPC Time: {dpc['before']}% → {dpc['after']}% ({'+' if dpc['diff'] >= 0 else ''}{dpc['diff']}%)")
+        else:
+            console.print(f"[{ERR}]Run Before and After benchmarks first![/]")
+        inp()
+
+
+def ui_export_settings():
+    from utils import settings
+    logo()
+    console.print(f"[{C1}]─── Export Settings ───[/]", justify="center")
+    console.print()
+    default_path = os.path.join(os.path.expanduser("~"), "Desktop", "meoboost_settings.json")
+    console.print(f"[{DIM}]Default: {default_path}[/]")
+    console.print(f"\n[{C2}]Enter path (or press Enter for default):[/]")
+    path = inp() or default_path
+    if settings.export_to_file(path):
+        console.print(f"\n[{OK}]✓ Exported to: {path}[/]")
+    else:
+        console.print(f"\n[{ERR}]✗ Export failed![/]")
+    inp()
+
+
+def ui_import_settings():
+    from utils import settings
+    logo()
+    console.print(f"[{C1}]─── Import Settings ───[/]", justify="center")
+    console.print()
+    console.print(f"[{C2}]Enter path to settings file:[/]")
+    path = inp()
+    if path and os.path.exists(path):
+        if settings.import_from_file(path):
+            console.print(f"\n[{OK}]✓ Imported successfully![/]")
+        else:
+            console.print(f"\n[{ERR}]✗ Import failed![/]")
+    else:
+        console.print(f"\n[{ERR}]File not found![/]")
     inp()
 
 

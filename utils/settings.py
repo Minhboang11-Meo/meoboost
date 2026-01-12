@@ -76,3 +76,27 @@ def mark_init():
 def clear():
     global _cache
     _cache = None
+
+def export_to_file(filepath):
+    data = load()
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        return True
+    except:
+        return False
+
+def import_from_file(filepath):
+    global _cache
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        _cache = data
+        save(_cache)
+        return True
+    except:
+        return False
+
+def get_all():
+    return load().copy()
+

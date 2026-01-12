@@ -235,6 +235,18 @@ TWEAKS = {
         "vi": {"name": "Backup", "desc": "Backup registry", "risk": "✓ An toàn"},
         "en": {"name": "Backup", "desc": "Backup registry", "risk": "✓ Safe"}
     },
+    "benchmark": {
+        "vi": {"name": "Benchmark", "desc": "Đo latency, RAM, DPC", "risk": "✓ An toàn"},
+        "en": {"name": "Benchmark", "desc": "Measure latency, RAM, DPC", "risk": "✓ Safe"}
+    },
+    "export_settings": {
+        "vi": {"name": "Export", "desc": "Xuất settings ra file", "risk": "✓ An toàn"},
+        "en": {"name": "Export", "desc": "Export settings to file", "risk": "✓ Safe"}
+    },
+    "import_settings": {
+        "vi": {"name": "Import", "desc": "Nhập settings từ file", "risk": "✓ An toàn"},
+        "en": {"name": "Import", "desc": "Import settings from file", "risk": "✓ Safe"}
+    },
     
     "nvidia_dram_active": {
         "vi": {"name": "NV DRAM Active", "desc": "Giữ bộ nhớ GPU luôn sẵn sàng, giảm delay", "risk": "⚡ Tăng điện"},
