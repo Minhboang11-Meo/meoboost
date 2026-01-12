@@ -445,6 +445,7 @@ def menu_benchmark():
         console.print(f"[{C2}][3][/] Compare Before/After")
         console.print(f"[{C2}][4][/] FPS Benchmark (10s)")
         console.print(f"[{C2}][5][/] CPU Stress Test (30s)")
+        console.print(f"[{C2}][6][/] GPU Benchmark (15s)")
         footer()
         
         ch = inp()
@@ -501,6 +502,17 @@ def menu_benchmark():
             console.print(f"  Score: [{C3}]{r.get('score', 0)}[/]")
             if r.get('completed'):
                 console.print(f"  Status: [{OK}]Completed[/]")
+            inp()
+        elif ch == "6":
+            console.print(f"\n[{WARN}]⏳ Running GPU benchmark (15s)...[/]")
+            console.print(f"[{DIM}]Heavy rendering test...[/]")
+            r = benchmark.run_gpu_benchmark(15)
+            console.print(f"\n[{OK}]━━━ GPU BENCHMARK ━━━[/]")
+            console.print(f"  FPS: [{C1}]{r['fps']}[/]")
+            console.print(f"  Frames: [{C1}]{r['frames']}[/]")
+            console.print(f"  Rectangles: [{C1}]{r.get('rectangles', 0):,}[/]")
+            console.print(f"  Pixels: [{C1}]{r.get('pixels', 0):,}[/]")
+            console.print(f"  Score: [{C3}]{r['score']}[/]")
             inp()
 
 

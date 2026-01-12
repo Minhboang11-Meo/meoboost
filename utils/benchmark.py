@@ -179,6 +179,78 @@ def run_stress_test(duration=30):
     except Exception as e:
         return {"cpu_ops": 0, "completed": False, "error": str(e)}
 
+def run_gpu_benchmark(duration=15):
+    try:
+        import ctypes
+        import threading
+        
+        gdi32 = ctypes.windll.gdi32
+        user32 = ctypes.windll.user32
+        
+        hdc = user32.GetDC(0)
+        width = user32.GetSystemMetrics(0)
+        height = user32.GetSystemMetrics(1)
+        
+        frames = 0
+        pixels = 0
+        rects = 0
+        start = time.time()
+        
+        hbrush = gdi32.CreateSolidBrush(0xFF0000)
+        hpen = gdi32.CreatePen(0, 2, 0x00FF00)
+        
+        while time.time() - start < duration:
+            old_brush = gdi32.SelectObject(hdc, hbrush)
+            old_pen = gdi32.SelectObject(hdc, hpen)
+            
+            for _ in range(50):
+                x = (frames * 17 + _ * 31) % width
+                y = (frames * 23 + _ * 37) % height
+                w = 20 + (frames % 80)
+                h = 20 + (frames % 60)
+                
+                gdi32.Rectangle(hdc, x, y, x + w, y + h)
+                gdi32.Ellipse(hdc, x + 10, y + 10, x + w - 10, y + h - 10)
+                rects += 2
+            
+            for _ in range(100):
+                x = (frames * 7 + _ * 13) % width
+                y = (frames * 11 + _ * 17) % height
+                color = ((frames + _) * 13) % 0xFFFFFF
+                gdi32.SetPixel(hdc, x, y, color)
+                pixels += 1
+            
+            for _ in range(10):
+                x1 = (frames * 5 + _ * 7) % width
+                y1 = (frames * 7 + _ * 11) % height
+                x2 = (x1 + 100) % width
+                y2 = (y1 + 100) % height
+                gdi32.MoveToEx(hdc, x1, y1, None)
+                gdi32.LineTo(hdc, x2, y2)
+            
+            gdi32.SelectObject(hdc, old_brush)
+            gdi32.SelectObject(hdc, old_pen)
+            
+            frames += 1
+        
+        gdi32.DeleteObject(hbrush)
+        gdi32.DeleteObject(hpen)
+        user32.ReleaseDC(0, hdc)
+        
+        elapsed = time.time() - start
+        fps = frames / elapsed
+        
+        return {
+            "fps": round(fps, 1),
+            "frames": frames,
+            "rectangles": rects,
+            "pixels": pixels,
+            "duration": round(elapsed, 2),
+            "score": int(fps * 15 + rects / 100)
+        }
+    except Exception as e:
+        return {"fps": 0, "frames": 0, "rectangles": 0, "pixels": 0, "duration": 0, "score": 0, "error": str(e)}
+
 def clear():
     global _results
     _results = {}
