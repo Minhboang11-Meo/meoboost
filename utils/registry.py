@@ -129,3 +129,4 @@ value_exists = exists
 reg_add = add
 reg_delete = rm
 reg_query = query
+get_subkeys = subkeys
