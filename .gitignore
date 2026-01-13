@@ -37,8 +37,13 @@ ENV/
 # PyInstaller
 *.manifest
 *.spec
-build/
-dist/
+
+# Nuitka
+*.build/
+*.dist/
+*.onefile-build/
+nuitka-crash-report.xml
+*.nuitka-crash-report.xml
 
 # Logs
 *.log
@@ -60,3 +65,4 @@ settings.json
 FilesCompressed/
 Files/GpuTest/_geeks3d_gputest_*.txt
 Files/GpuTest/_geeks3d_gputest_*.csv
+

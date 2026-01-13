@@ -4,12 +4,17 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
+  # Build the application with Nuitka
   build:
     runs-on: windows-latest
     
@@ -20,47 +25,34 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: 'pip'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller rich
+          pip install nuitka ordered-set zstandard rich
           pip install -r requirements.txt
 
-      - name: Build executable
+      - name: Build with Nuitka
         run: |
-          pyinstaller --noconfirm --onefile --console --name "MeoBoost" `
-            --add-data "Files;Files" `
-            --hidden-import "rich" `
-            --hidden-import "rich.console" `
-            --hidden-import "rich.table" `
-            --hidden-import "rich.box" `
-            --hidden-import "tweaks" `
-            --hidden-import "tweaks.power" `
-            --hidden-import "tweaks.nvidia" `
-            --hidden-import "tweaks.amd" `
-            --hidden-import "tweaks.intel" `
-            --hidden-import "tweaks.gpu_common" `
-            --hidden-import "tweaks.network" `
-            --hidden-import "tweaks.memory" `
-            --hidden-import "tweaks.input" `
-            --hidden-import "tweaks.system" `
-            --hidden-import "tweaks.misc" `
-            --hidden-import "tweaks.privacy" `
-            --hidden-import "tweaks.fps" `
-            --hidden-import "utils" `
-            --hidden-import "utils.registry" `
-            --hidden-import "utils.system" `
-            --hidden-import "utils.backup" `
-            --hidden-import "utils.files" `
-            --hidden-import "utils.settings" `
-            --hidden-import "utils.benchmark" `
-            --hidden-import "ui" `
-            --hidden-import "ui.terminal" `
-            --collect-all "rich" `
-            --uac-admin `
+          python -m nuitka `
+            --standalone `
+            --onefile `
+            --output-dir=dist `
+            --windows-console-mode=force `
+            --include-data-dir=Files=Files `
+            --enable-plugin=anti-bloat `
+            --remove-output `
+            --assume-yes-for-downloads `
+            --company-name="MeoBoost Open Source" `
+            --product-name="MeoBoost" `
+            --file-version=1.0.0.0 `
+            --product-version=1.0.0.0 `
+            --file-description="Windows Performance Optimizer" `
+            --copyright="MIT License - github.com/Minhboang11-Meo/meoboost" `
+            --deployment `
+            --output-filename=MeoBoost.exe `
             main.py
 
       - name: Verify build
@@ -70,9 +62,30 @@ jobs:
             $sizeMB = [math]::Round($size / 1MB, 2)
             Write-Host "Build successful! Size: $sizeMB MB"
           } else {
-            Write-Host "Build failed"
+            Write-Host "Build failed - checking for alternative paths..."
+            Get-ChildItem -Recurse -Filter "*.exe" | Select-Object FullName, Length
             exit 1
           }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MeoBoost-exe
+          path: dist/MeoBoost.exe
+          retention-days: 7
+
+  # Create GitHub Release (only on tags)
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: MeoBoost-exe
+          path: dist
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -92,14 +105,95 @@ jobs:
             ### 📦 Manual Download
             Download `MeoBoost.exe` below and run as Administrator.
             
-            ### ✨ Features
-            - Windows Performance Optimizer for Gaming
-            - FPS Boost & Input Lag Reduction
-            - Privacy Tweaks (Copilot, Telemetry, etc.)
-            - No Python required!
+            ### ✨ What's New
+            - Built with Nuitka (native C compilation) for better AV compatibility
+            - Dynamic command building to reduce false positives
+            - Removed bundled tools that triggered AV signatures
+            
+            ### 🛡️ Security
+            - No shell injection vulnerabilities
+            - Specific exception handling throughout
+            - Clean subprocess execution patterns
           draft: false
           prerelease: false
           files: |
             dist/MeoBoost.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Deploy GitHub Pages (runs in parallel)
+  pages:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Create simple landing page
+        run: |
+          mkdir -p _site
+          cat > _site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>MeoBoost - Windows Performance Optimizer</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                min-height: 100vh; color: #fff;
+                display: flex; align-items: center; justify-content: center;
+              }
+              .container { text-align: center; padding: 2rem; max-width: 800px; }
+              h1 { font-size: 3rem; margin-bottom: 1rem; 
+                background: linear-gradient(90deg, #00d4ff, #0096c7);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+              .tagline { font-size: 1.2rem; color: #aaa; margin-bottom: 2rem; }
+              .cmd { background: #0d1117; border-radius: 8px; padding: 1rem 2rem;
+                font-family: 'Consolas', monospace; margin: 2rem 0; border: 1px solid #30363d; }
+              .cmd code { color: #58a6ff; }
+              .btn { display: inline-block; padding: 1rem 2rem; margin: 0.5rem;
+                background: linear-gradient(90deg, #00d4ff, #0096c7); color: #000;
+                text-decoration: none; border-radius: 8px; font-weight: bold;
+                transition: transform 0.2s; }
+              .btn:hover { transform: scale(1.05); }
+              .features { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 2rem; }
+              .feature { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; flex: 1; min-width: 200px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>🐱 MeoBoost</h1>
+              <p class="tagline">Windows Performance Optimizer for Gaming</p>
+              <div class="cmd">
+                <code>irm https://minhboang11-meo.github.io/meoboost/run.ps1 | iex</code>
+              </div>
+              <a href="https://github.com/Minhboang11-Meo/meoboost/releases/latest" class="btn">⬇️ Download</a>
+              <a href="https://github.com/Minhboang11-Meo/meoboost" class="btn">📦 GitHub</a>
+              <div class="features">
+                <div class="feature">🎮 FPS Boost</div>
+                <div class="feature">⚡ Low Latency</div>
+                <div class="feature">🔒 Privacy</div>
+                <div class="feature">🔧 GPU Tweaks</div>
+              </div>
+            </div>
+          </body>
+          </html>
+          EOF
+          cp run.ps1 _site/run.ps1
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+

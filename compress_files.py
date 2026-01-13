@@ -13,8 +13,8 @@ COMPRESSED_DIR = "FilesCompressed"
 # Group files by usage pattern for optimal extraction
 FILE_GROUPS = {
     "core": [
-        "EmptyStandbyList.exe",
-        "nssm.exe", 
+        # EmptyStandbyList.exe removed - using native PowerShell instead
+        # nssm.exe removed - using scheduled tasks instead
         "SetTimerResolutionService.exe",
     ],
     "nvidia": [
@@ -35,7 +35,7 @@ FILE_GROUPS = {
         "meoboost.pow",
     ],
     "misc": [
-        "NSudo.exe",
+        # NSudo.exe removed - not needed, causes AV flags
         "restart64.exe",
         "sed.exe",
         "meoboost.usf",
