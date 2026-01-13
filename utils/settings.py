@@ -8,7 +8,7 @@ def _ensure_dir():
     if not os.path.exists(DATA_DIR):
         try:
             os.makedirs(DATA_DIR, exist_ok=True)
-        except:
+        except Exception:
             pass  # might fail on some weird setups
 
 def load():
@@ -22,7 +22,7 @@ def load():
         try:
             with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
                 _cache = json.load(f)
-        except:
+        except Exception:
             _cache = {}  # corrupted file, just reset
     else:
         _cache = {}
@@ -42,7 +42,7 @@ def save(data=None):
         with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
             json.dump(_cache, f, indent=2, ensure_ascii=False)
         return True
-    except:
+    except Exception:
         return False  # TODO: handle permission issues
 
 def get(key, default=None):
@@ -83,7 +83,7 @@ def export_to_file(filepath):
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         return True
-    except:
+    except Exception:
         return False
 
 def import_from_file(filepath):
@@ -94,7 +94,7 @@ def import_from_file(filepath):
         _cache = data
         save(_cache)
         return True
-    except:
+    except Exception:
         return False
 
 def get_all():

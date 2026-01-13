@@ -34,13 +34,17 @@ $PyCmd = $null
 try {
     $r = py -3 --version 2>&1
     if ($LASTEXITCODE -eq 0) { $PyCmd = "py" }
-} catch {}
+} catch {
+    # Ignore errors if py launcher is not found
+}
 
 if (-not $PyCmd) {
     try {
         $r = python --version 2>&1
         if ($LASTEXITCODE -eq 0 -and $r -match "Python 3") { $PyCmd = "python" }
-    } catch {}
+    } catch {
+        # Ignore errors if python executable is not found
+    }
 }
 
 if (-not $PyCmd) {

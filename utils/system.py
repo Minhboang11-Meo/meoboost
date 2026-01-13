@@ -63,9 +63,14 @@ def elevate():
         sys.exit()
 
 
-def cmd(command, shell=True, timeout=60):
+def cmd(command, shell=False, timeout=60):
     """Execute a command and return (returncode, stdout, stderr)."""
     try:
+        # Auto-split string commands if shell is False
+        if isinstance(command, str) and not shell:
+            import shlex
+            command = shlex.split(command)
+
         # Use subprocess with shell parameter
         r = subprocess.run(
             command, 

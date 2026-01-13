@@ -34,7 +34,7 @@ def run_cleaner():
         if os.path.exists(recycle_bin):
             shutil.rmtree(recycle_bin, ignore_errors=True)
     except Exception:
-        pass
+        pass  # Ignore if Recycle Bin access fails
     
     # Clear user temp
     if temp_dir and os.path.exists(temp_dir):

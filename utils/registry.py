@@ -76,7 +76,7 @@ def subkeys(path):
                 except OSError:
                     break
     except Exception:
-        pass
+        pass  # Return empty list on error
     return keys
 
 def add(path, name, val, typ="REG_DWORD"):
