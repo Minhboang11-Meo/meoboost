@@ -7,7 +7,8 @@ $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
 $Repo = "meohunterr/MeoBoost"
-$Dir = Join-Path $env:USERPROFILE ".MeoBoost"
+# Use LocalAppData instead of hidden user profile folder to avoid "Suspicious" flag
+$Dir = Join-Path $env:LOCALAPPDATA "MeoBoost"
 $Src = Join-Path $Dir "source"
 
 function Write-S { param([string]$M) Write-Host "  [*] $M" -ForegroundColor Yellow }
@@ -45,14 +46,37 @@ if (-not $PyCmd) {
 if (-not $PyCmd) {
     # Install Python
     Write-S "Python not found. Installing..."
-    $installer = Join-Path $env:TEMP "python_setup.exe"
-    Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" -OutFile $installer -UseBasicParsing
-    Start-Process -FilePath $installer -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1 Include_pip=1" -Wait
-    $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
-    Remove-Item $installer -Force -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 2
-    $PyCmd = "py"
-    Write-O "Python installed"
+    $installed = $false
+
+    # Try Winget first (Recommended/Safe method)
+    if (Get-Command "winget" -ErrorAction SilentlyContinue) {
+        try {
+            Write-S "Attempting installation via Winget..."
+            $proc = Start-Process -FilePath "winget" -ArgumentList "install -e --id Python.Python.3.11 --scope machine --accept-package-agreements --accept-source-agreements --disable-interactivity" -PassThru -Wait
+            if ($proc.ExitCode -eq 0) {
+                $installed = $true
+                # Refresh env vars
+                $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+                $PyCmd = "py"
+                Write-O "Python installed via Winget"
+            }
+        } catch {
+            Write-E "Winget failed. Trying direct download..."
+        }
+    }
+
+    # Fallback to direct download if Winget fails or is missing
+    if (-not $installed) {
+        Write-S "Downloading Python installer..."
+        $installer = Join-Path $env:TEMP "python_setup.exe"
+        Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" -OutFile $installer -UseBasicParsing
+        Start-Process -FilePath $installer -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1 Include_pip=1" -Wait
+        $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+        Remove-Item $installer -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 2
+        $PyCmd = "py"
+        Write-O "Python installed manually"
+    }
 } else {
     Write-O "Python found"
 }
