@@ -124,21 +124,24 @@ def main(latest_ver=None, update_avail=False):
     while True:
         logo(latest_ver, update_avail)
         
-        # Dashboard Layout - Separated Panels
-        # Use a table with no box to hold the panels, ensuring alignment
-        grid = Table(box=None, show_header=False, show_edge=False, pad_edge=False, expand=True, padding=(0, 1))
+        # Dashboard Layout - Separated Panels (Fixed Height)
+        # Use Table.grid for perfect alignment
+        grid = Table.grid(expand=True, padding=(1, 2))
         grid.add_column(ratio=1)
         grid.add_column(ratio=1)
+        
+        # Fixed height for all panels to ensure alignment
+        h = 5
         
         # Row 1
         grid.add_row(
             Panel(
                 f"[bold white]{t('menu_optimize')}[/]\n[{DIM}]Basic tweaks & FPS boost[/]", 
-                title="[1] 🚀", border_style=C2, box=box.ROUNDED, expand=True
+                title="[1] 🚀", border_style=C2, box=box.ROUNDED, expand=True, height=h
             ),
             Panel(
                 f"[bold white]{t('menu_deep_optimize')}[/]\n[{DIM}]Advanced & Experimental[/]", 
-                title="[2] ⚡", border_style="red", box=box.ROUNDED, expand=True
+                title="[2] ⚡", border_style="red", box=box.ROUNDED, expand=True, height=h
             )
         )
         
@@ -146,11 +149,11 @@ def main(latest_ver=None, update_avail=False):
         grid.add_row(
             Panel(
                 f"[bold white]{t('menu_privacy')}[/]\n[{DIM}]Block telemetry & ads[/]", 
-                title="[3] 🛡️", border_style="green", box=box.ROUNDED, expand=True
+                title="[3] 🛡️", border_style="green", box=box.ROUNDED, expand=True, height=h
             ),
             Panel(
                 f"[bold white]{t('menu_tools')}[/]\n[{DIM}]Cleaner, Backup, etc.[/]", 
-                title="[4] 🔧", border_style="magenta", box=box.ROUNDED, expand=True
+                title="[4] 🔧", border_style="magenta", box=box.ROUNDED, expand=True, height=h
             )
         )
         
@@ -158,11 +161,11 @@ def main(latest_ver=None, update_avail=False):
         grid.add_row(
             Panel(
                 f"[bold white]{t('menu_language')}[/]\n[{DIM}]{get_lang().upper()}[/]", 
-                title="[5] 🌐", border_style="blue", box=box.ROUNDED, expand=True
+                title="[5] 🌐", border_style="blue", box=box.ROUNDED, expand=True, height=h
             ),
             Panel(
                 f"[bold white]{t('menu_exit')}[/]\n[{DIM}]Bye bye![/]", 
-                title="[X] 🚪", border_style=DIM, box=box.ROUNDED, expand=True
+                title="[X] 🚪", border_style=DIM, box=box.ROUNDED, expand=True, height=h
             )
         )
         
