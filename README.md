@@ -41,7 +41,6 @@
 - **Safe & Open**: 100% Open Source Python code. No compiled EXEs, no hidden malware.
 
 ---
-
 ## 🚀 Quick Start
 
 ### Option 1: The "One-Liner" (Recommended)
@@ -51,7 +50,7 @@ The easiest way to install and run MeoBoost. Automatically installs Python if mi
 2. Paste and run the following command:
 
 ```powershell
-irm https://raw.githubusercontent.com/meohunterr/MeoBoost/main/run.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/meohunterr/MeoBoost/main/run.ps1 -OutFile run.ps1; .\run.ps1
 ```
 
 ### Option 2: Manual Installation

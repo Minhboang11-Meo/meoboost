@@ -24,7 +24,7 @@ $id = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = New-Object Security.Principal.WindowsPrincipal($id)
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-S "Requesting admin privileges..."
-    Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/$Repo/main/run.ps1 | iex`""
+    Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
     exit
 }
 
@@ -32,7 +32,7 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
 $PyCmd = $null
 try {
     $r = py -3 --version 2>&1
-    if ($LASTEXITCODE -eq 0) { $PyCmd = "py -3" }
+    if ($LASTEXITCODE -eq 0) { $PyCmd = "py" }
 } catch {}
 
 if (-not $PyCmd) {
@@ -51,7 +51,7 @@ if (-not $PyCmd) {
     $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
     Remove-Item $installer -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 2
-    $PyCmd = "py -3"
+    $PyCmd = "py"
     Write-O "Python installed"
 } else {
     Write-O "Python found"
@@ -76,7 +76,8 @@ Write-O "Source code ready"
 $reqFile = Join-Path $Src "requirements.txt"
 if (Test-Path $reqFile) {
     Write-S "Installing dependencies..."
-    Invoke-Expression "$PyCmd -m pip install -r `"$reqFile`" -q" 2>&1 | Out-Null
+    # Safe execution without Invoke-Expression
+    & $PyCmd -m pip install -r $reqFile -q
     Write-O "Dependencies installed"
 }
 
@@ -86,7 +87,8 @@ Write-S "Starting MeoBoost..."
 Write-Host ""
 
 Set-Location $Src
-Invoke-Expression "$PyCmd main.py"
+# Safe execution without Invoke-Expression
+& $PyCmd main.py
 
 Write-Host ""
 Write-O "Session ended."
