@@ -367,6 +367,52 @@ TWEAKS = {
         "vi": {"name": "RDP Redirector Off", "desc": "Tắt điều khiển từ xa", "risk": "⚠ RDP không dùng"},
         "en": {"name": "RDP Redirector Off", "desc": "Disable remote desktop redirector", "risk": "⚠ No RDP"}
     },
+    
+    # WinUtil Tweaks
+    "copilot": {
+        "vi": {"name": "Copilot Off", "desc": "Tắt Microsoft Copilot AI", "risk": "✓ An toàn"},
+        "en": {"name": "Copilot Off", "desc": "Disable Microsoft Copilot AI", "risk": "✓ Safe"}
+    },
+    "bg_apps": {
+        "vi": {"name": "Background Apps", "desc": "Tắt ứng dụng chạy nền", "risk": "⚠ Store apps"},
+        "en": {"name": "Background Apps", "desc": "Disable background apps", "risk": "⚠ Store apps"}
+    },
+    "end_task": {
+        "vi": {"name": "End Task Click", "desc": "End Task khi click phải taskbar", "risk": "✓ An toàn"},
+        "en": {"name": "End Task Click", "desc": "End Task on taskbar right-click", "risk": "✓ Safe"}
+    },
+    "classic_menu": {
+        "vi": {"name": "Classic Menu", "desc": "Menu chuột phải Win10", "risk": "✓ An toàn"},
+        "en": {"name": "Classic Menu", "desc": "Windows 10 context menu", "risk": "✓ Safe"}
+    },
+    "dark_mode": {
+        "vi": {"name": "Dark Mode", "desc": "Bật/tắt chế độ tối", "risk": "✓ An toàn"},
+        "en": {"name": "Dark Mode", "desc": "Toggle dark theme", "risk": "✓ Safe"}
+    },
+    "file_ext": {
+        "vi": {"name": "File Extensions", "desc": "Hiển thị đuôi file", "risk": "✓ An toàn"},
+        "en": {"name": "File Extensions", "desc": "Show file extensions", "risk": "✓ Safe"}
+    },
+    "hidden_files": {
+        "vi": {"name": "Hidden Files", "desc": "Hiển thị file ẩn", "risk": "✓ An toàn"},
+        "en": {"name": "Hidden Files", "desc": "Show hidden files", "risk": "✓ Safe"}
+    },
+    "bing_search": {
+        "vi": {"name": "Bing Search Off", "desc": "Tắt Bing trong Start Menu", "risk": "✓ An toàn"},
+        "en": {"name": "Bing Search Off", "desc": "Disable Bing in Start Menu", "risk": "✓ Safe"}
+    },
+    "wifi_sense": {
+        "vi": {"name": "Wi-Fi Sense Off", "desc": "Tắt chia sẻ mật khẩu Wi-Fi", "risk": "✓ An toàn"},
+        "en": {"name": "Wi-Fi Sense Off", "desc": "Disable Wi-Fi password sharing", "risk": "✓ Safe"}
+    },
+    "storage_sense": {
+        "vi": {"name": "Storage Sense Off", "desc": "Tắt tự động xóa temp", "risk": "⚠ Thủ công dọn"},
+        "en": {"name": "Storage Sense Off", "desc": "Disable auto temp cleanup", "risk": "⚠ Manual cleanup"}
+    },
+    "all_winutil": {
+        "vi": {"name": "All WinUtil", "desc": "Áp dụng tất cả WinUtil tweaks", "risk": "⚠ Nhiều thay đổi"},
+        "en": {"name": "All WinUtil", "desc": "Apply all WinUtil tweaks", "risk": "⚠ Many changes"}
+    },
 }
 
 UI = {

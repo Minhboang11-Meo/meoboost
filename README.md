@@ -32,18 +32,32 @@
 
 🔒 **Privacy** — Disable telemetry, Cortana, and tracking features
 
-## Quick Start
+## ⚡ Quick Start
 
-### Option 1: Run from source
+### Option 1: One-Liner (Recommended)
+
+Run this command in PowerShell (as Administrator):
+
+```powershell
+irm https://raw.githubusercontent.com/Minhboang11-Meo/meoboost/main/run.ps1 | iex
+```
+
+> **No installation required.** Downloads and runs MeoBoost with admin privileges automatically.
+
+---
+
+### Option 2: Download EXE
+
+Download the latest release from [Releases](../../releases) — no Python required.
+
+---
+
+### Option 3: Run from source
 
 ```bash
 pip install -r requirements.txt
 python main.py
 ```
-
-### Option 2: Download EXE
-
-Download the latest release from [Releases](../../releases) — no Python required.
 
 ## Build
 

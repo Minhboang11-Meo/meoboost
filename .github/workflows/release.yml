@@ -1,0 +1,113 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller rich
+          pip install -r requirements.txt
+
+      - name: Compress Files
+        run: python compress_files.py
+
+      - name: Build optimized executable
+        run: |
+          pyinstaller --noconfirm --onefile --console --name "MeoBoost" `
+            --add-data "FilesCompressed;FilesCompressed" `
+            --hidden-import "rich" `
+            --hidden-import "rich.console" `
+            --hidden-import "rich.table" `
+            --hidden-import "tweaks.power" `
+            --hidden-import "tweaks.nvidia" `
+            --hidden-import "tweaks.amd" `
+            --hidden-import "tweaks.intel" `
+            --hidden-import "tweaks.gpu_common" `
+            --hidden-import "tweaks.network" `
+            --hidden-import "tweaks.memory" `
+            --hidden-import "tweaks.input" `
+            --hidden-import "tweaks.system" `
+            --hidden-import "tweaks.misc" `
+            --hidden-import "tweaks.privacy" `
+            --hidden-import "tweaks.fps" `
+            --hidden-import "tweaks.winutil" `
+            --hidden-import "utils.registry" `
+            --hidden-import "utils.system" `
+            --hidden-import "utils.backup" `
+            --hidden-import "utils.files" `
+            --hidden-import "utils.settings" `
+            --hidden-import "utils.benchmark" `
+            --hidden-import "ui.terminal" `
+            --exclude-module "matplotlib" `
+            --exclude-module "numpy" `
+            --exclude-module "pandas" `
+            --exclude-module "PIL" `
+            --exclude-module "tkinter" `
+            --exclude-module "unittest" `
+            --exclude-module "pydoc" `
+            --exclude-module "test" `
+            --strip `
+            --uac-admin `
+            main.py
+
+      - name: Verify build
+        run: |
+          if (Test-Path "dist\MeoBoost.exe") {
+            $size = (Get-Item "dist\MeoBoost.exe").Length
+            $sizeMB = [math]::Round($size / 1MB, 2)
+            Write-Host "Build successful! Size: $sizeMB MB"
+          } else {
+            Write-Host "Build failed"
+            exit 1
+          }
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: MeoBoost ${{ github.ref_name }}
+          body: |
+            ## 🚀 MeoBoost ${{ github.ref_name }}
+            
+            ### ⚡ Quick Start (One-Liner)
+            
+            Run in PowerShell as Administrator:
+            ```powershell
+            irm https://raw.githubusercontent.com/${{ github.repository }}/main/run.ps1 | iex
+            ```
+            
+            ### 📦 Manual Download
+            Download `MeoBoost.exe` below and run as Administrator.
+            
+            ### ✨ Features
+            - Windows Performance Optimizer for Gaming
+            - FPS Boost & Input Lag Reduction
+            - Privacy Tweaks & WinUtil Integration
+            - No Python required!
+          draft: false
+          prerelease: false
+          files: |
+            dist/MeoBoost.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

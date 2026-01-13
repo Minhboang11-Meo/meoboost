@@ -3,46 +3,50 @@ title MeoBoost Launcher
 color 0B
 
 echo.
-echo   MeoBoost - Windows Performance Optimizer
-echo   =========================================
+echo   ╔══════════════════════════════════════════════════════════╗
+echo   ║           MeoBoost - Windows Performance Optimizer       ║
+echo   ╚══════════════════════════════════════════════════════════╝
 echo.
 
-:: Kiem tra Python
+:: Check Python installation
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [LOI] Chua cai Python!
-    echo Tai Python 3.8+ tai: https://www.python.org/downloads/
-    echo Nho tick "Add Python to PATH" khi cai dat.
+    echo [ERROR] Python is not installed!
+    echo.
+    echo Download Python 3.8+ at: https://www.python.org/downloads/
+    echo Remember to check "Add Python to PATH" during installation.
+    echo.
     pause
     exit /b 1
 )
 
-echo [OK] Da tim thay Python
+echo [OK] Python found
 echo.
 
-:: Kiem tra dependencies
-echo [INFO] Kiem tra thu vien...
+:: Check dependencies
+echo [INFO] Checking required libraries...
 pip show rich >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [INFO] Cai dat thu vien...
+    echo [INFO] Installing required libraries...
     pip install -r requirements.txt
     if %errorlevel% neq 0 (
-        echo [LOI] Khong the cai dat thu vien!
+        echo [ERROR] Failed to install libraries!
+        echo Please check your internet connection and try again.
         pause
         exit /b 1
     )
 )
 
-echo [OK] Thu vien da san sang
+echo [OK] All libraries are ready
 echo.
 
-:: Chay voi quyen admin
-echo [INFO] Khoi dong MeoBoost...
+:: Run with admin privileges
+echo [INFO] Starting MeoBoost...
 echo.
 
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [INFO] Yeu cau quyen Administrator...
+    echo [INFO] Requesting Administrator privileges...
     powershell -Command "Start-Process python -ArgumentList 'main.py' -Verb RunAs -WorkingDirectory '%~dp0'"
 ) else (
     python main.py

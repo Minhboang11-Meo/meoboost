@@ -57,3 +57,6 @@ desktop.ini
 MeoBoost/
 Backups/
 settings.json
+FilesCompressed/
+Files/GpuTest/_geeks3d_gputest_*.txt
+Files/GpuTest/_geeks3d_gputest_*.csv

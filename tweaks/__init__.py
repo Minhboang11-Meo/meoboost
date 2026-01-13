@@ -14,3 +14,4 @@ from tweaks import system
 from tweaks import misc
 from tweaks import privacy
 from tweaks import fps
+from tweaks import winutil
