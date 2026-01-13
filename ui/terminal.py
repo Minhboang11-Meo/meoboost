@@ -124,30 +124,49 @@ def main(latest_ver=None, update_avail=False):
     while True:
         logo(latest_ver, update_avail)
         
-        # Dashboard Layout - Seamless Block
-        menu_table = Table(box=box.ROUNDED, show_lines=True, expand=True, padding=(1, 2), border_style=DIM)
-        menu_table.add_column(ratio=1)
-        menu_table.add_column(ratio=1)
+        # Dashboard Layout - Separated Panels
+        # Use a table with no box to hold the panels, ensuring alignment
+        grid = Table(box=None, show_header=False, show_edge=False, pad_edge=False, expand=True, padding=(0, 1))
+        grid.add_column(ratio=1)
+        grid.add_column(ratio=1)
         
         # Row 1
-        menu_table.add_row(
-            f"[bold cyan][1] 🚀 {t('menu_optimize')}[/]\n[{DIM}]Basic tweaks & FPS boost[/]",
-            f"[bold red][2] ⚡ {t('menu_deep_optimize')}[/]\n[{DIM}]Advanced & Experimental[/]"
+        grid.add_row(
+            Panel(
+                f"[bold white]{t('menu_optimize')}[/]\n[{DIM}]Basic tweaks & FPS boost[/]", 
+                title="[1] 🚀", border_style=C2, box=box.ROUNDED, expand=True
+            ),
+            Panel(
+                f"[bold white]{t('menu_deep_optimize')}[/]\n[{DIM}]Advanced & Experimental[/]", 
+                title="[2] ⚡", border_style="red", box=box.ROUNDED, expand=True
+            )
         )
         
         # Row 2
-        menu_table.add_row(
-            f"[bold green][3] 🛡️ {t('menu_privacy')}[/]\n[{DIM}]Block telemetry & ads[/]",
-            f"[bold magenta][4] 🔧 {t('menu_tools')}[/]\n[{DIM}]Cleaner, Backup, etc.[/]"
+        grid.add_row(
+            Panel(
+                f"[bold white]{t('menu_privacy')}[/]\n[{DIM}]Block telemetry & ads[/]", 
+                title="[3] 🛡️", border_style="green", box=box.ROUNDED, expand=True
+            ),
+            Panel(
+                f"[bold white]{t('menu_tools')}[/]\n[{DIM}]Cleaner, Backup, etc.[/]", 
+                title="[4] 🔧", border_style="magenta", box=box.ROUNDED, expand=True
+            )
         )
         
         # Row 3
-        menu_table.add_row(
-            f"[bold blue][5] 🌐 {t('menu_language')}[/]\n[{DIM}]{get_lang().upper()}[/]",
-            f"[bold white][X] 🚪 {t('menu_exit')}[/]\n[{DIM}]Bye bye![/]"
+        grid.add_row(
+            Panel(
+                f"[bold white]{t('menu_language')}[/]\n[{DIM}]{get_lang().upper()}[/]", 
+                title="[5] 🌐", border_style="blue", box=box.ROUNDED, expand=True
+            ),
+            Panel(
+                f"[bold white]{t('menu_exit')}[/]\n[{DIM}]Bye bye![/]", 
+                title="[X] 🚪", border_style=DIM, box=box.ROUNDED, expand=True
+            )
         )
         
-        console.print(menu_table)
+        console.print(grid)
         
         ch = inp()
         if ch == "1": menu_optimize()
