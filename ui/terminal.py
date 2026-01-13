@@ -462,48 +462,51 @@ def menu_benchmark():
         logo()
         console.print(f"[{C1}]─── STRESS TEST [BETA] ───[/]", justify="center")
         console.print()
-        console.print(f"[{DIM}]⚠ Sử dụng GpuTest để stress GPU[/]")
+        console.print(f"[{DIM}]Native CPU/Memory stress test (no external tools)[/]")
         console.print()
-        console.print(f"[{C2}][1][/] FurMark Stress Test (30s)")
-        console.print(f"[{C2}][2][/] FurMark Stress Test (60s)")
-        console.print(f"[{C2}][3][/] View Last Scores")
+        console.print(f"[{C2}][1][/] CPU Stress Test (10s)")
+        console.print(f"[{C2}][2][/] CPU Stress Test (30s)")
+        console.print(f"[{C2}][3][/] Memory Stress Test (10s)")
         footer()
         
         ch = inp()
         if ch.lower() == "b": break
         elif ch.lower() == "x": sys.exit(0)
         elif ch == "1":
-            console.print(f"\n[{WARN}]⏳ Running GPU Stress Test (30s)...[/]")
-            console.print(f"[{DIM}]GpuTest FurMark running...[/]")
-            r = benchmark.run_stress_test(30)
+            console.print(f"\n[{WARN}]⏳ Running CPU Stress Test (10s)...[/]")
+            r = benchmark.run_stress_test(10, "cpu")
             if r.get("error"):
                 console.print(f"[{ERR}]Error: {r['error']}[/]")
             else:
                 console.print(f"\n[{OK}]━━━ STRESS TEST COMPLETED ━━━[/]")
-                console.print(f"  Test: [{C1}]{r['test']}[/]")
+                console.print(f"  Test: [{C1}]{r['test'].upper()}[/]")
                 console.print(f"  Duration: [{C1}]{r['duration']}s[/]")
+                console.print(f"  Cores: [{C1}]{r.get('cores_used', 'N/A')}[/]")
                 console.print(f"  Score: [{C3}]{r['score']}[/]")
             inp()
         elif ch == "2":
-            console.print(f"\n[{WARN}]⏳ Running GPU Stress Test (60s)...[/]")
-            console.print(f"[{DIM}]GpuTest FurMark running...[/]")
-            r = benchmark.run_stress_test(60)
+            console.print(f"\n[{WARN}]⏳ Running CPU Stress Test (30s)...[/]")
+            r = benchmark.run_stress_test(30, "cpu")
             if r.get("error"):
                 console.print(f"[{ERR}]Error: {r['error']}[/]")
             else:
                 console.print(f"\n[{OK}]━━━ STRESS TEST COMPLETED ━━━[/]")
-                console.print(f"  Test: [{C1}]{r['test']}[/]")
+                console.print(f"  Test: [{C1}]{r['test'].upper()}[/]")
                 console.print(f"  Duration: [{C1}]{r['duration']}s[/]")
+                console.print(f"  Cores: [{C1}]{r.get('cores_used', 'N/A')}[/]")
                 console.print(f"  Score: [{C3}]{r['score']}[/]")
             inp()
         elif ch == "3":
-            scores = benchmark.get_last_scores()
-            if scores:
-                console.print(f"\n[{OK}]━━━ LAST SCORES ━━━[/]")
-                for s in scores:
-                    console.print(f"  {s['date']} | {s['test']} | {s['resolution']} | Score: [{C3}]{s['score']}[/]")
+            console.print(f"\n[{WARN}]⏳ Running Memory Stress Test (10s)...[/]")
+            r = benchmark.run_stress_test(10, "memory")
+            if r.get("error"):
+                console.print(f"[{ERR}]Error: {r['error']}[/]")
             else:
-                console.print(f"[{ERR}]No scores found[/]")
+                console.print(f"\n[{OK}]━━━ STRESS TEST COMPLETED ━━━[/]")
+                console.print(f"  Test: [{C1}]{r['test'].upper()}[/]")
+                console.print(f"  Duration: [{C1}]{r['duration']}s[/]")
+                console.print(f"  Block Size: [{C1}]{r.get('block_size_mb', 'N/A')} MB[/]")
+                console.print(f"  Score: [{C3}]{r['score']}[/]")
             inp()
 
 
