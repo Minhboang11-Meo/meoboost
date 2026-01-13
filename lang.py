@@ -5,7 +5,9 @@ def get_system_language():
         import ctypes
         lang_id = ctypes.windll.kernel32.GetUserDefaultUILanguage()
         return "vi" if lang_id == 1066 else "en"
-    except:
+    except (AttributeError, OSError):
+        # Failed to detect system language (e.g., non-Windows OS or access error)
+        # Fall back to English as default
         return "en"
 
 TWEAKS = {

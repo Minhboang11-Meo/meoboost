@@ -1,184 +1,217 @@
 <#
 .SYNOPSIS
     MeoBoost - Windows Performance Optimizer
-    One-liner launcher script (similar to WinUtil)
+    Official launcher script for downloading and running MeoBoost
 
 .DESCRIPTION
-    Downloads and runs the latest MeoBoost release.
-    Usage: irm https://raw.githubusercontent.com/Minhboang11-Meo/meoboost/main/run.ps1 | iex
+    This script downloads the latest MeoBoost release from GitHub
+    and runs it with appropriate permissions.
+    
+    MeoBoost is an open-source Windows optimization tool.
+    Source code: https://github.com/Minhboang11-Meo/meoboost
 
 .NOTES
-    Requires Windows 10/11 and Administrator privileges
+    - Requires Windows 10/11
+    - Administrator privileges required for system tweaks
+    - All downloads are from official GitHub releases only
+
+.LINK
+    https://github.com/Minhboang11-Meo/meoboost
 #>
 
 # ============================================
-#  MeoBoost Bootstrapper
+#  MeoBoost Launcher Script
+#  Version: 1.1.0
+#  License: MIT
 # ============================================
 
+# Strict mode for safety
+Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
-# Configuration
-$AppName = "MeoBoost"
-$RepoOwner = "Minhboang11-Meo"
-$RepoName = "meoboost"
-$InstallDir = "$env:USERPROFILE\.meoboost"
-$ExePath = "$InstallDir\MeoBoost.exe"
+# Application Configuration
+$script:AppName = "MeoBoost"
+$script:GitHubOwner = "Minhboang11-Meo"
+$script:GitHubRepo = "meoboost"
+$script:InstallDirectory = Join-Path $env:USERPROFILE ".meoboost"
+$script:ExecutablePath = Join-Path $script:InstallDirectory "MeoBoost.exe"
+$script:VersionFilePath = Join-Path $script:InstallDirectory "version.txt"
 
-# Colors
-function Write-Header {
+# Display branded header
+function Show-ApplicationHeader {
     Write-Host ""
     Write-Host "  ╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
     Write-Host "  ║           MeoBoost - Windows Performance Optimizer       ║" -ForegroundColor Cyan
+    Write-Host "  ║              https://github.com/$script:GitHubOwner/$script:GitHubRepo            ║" -ForegroundColor DarkCyan
     Write-Host "  ╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
 }
 
-function Write-Step {
+# Output helper functions
+function Write-StatusMessage {
     param([string]$Message)
     Write-Host "  [*] $Message" -ForegroundColor Yellow
 }
 
-function Write-Success {
+function Write-SuccessMessage {
     param([string]$Message)
-    Write-Host "  [✓] $Message" -ForegroundColor Green
+    Write-Host "  [OK] $Message" -ForegroundColor Green
 }
 
-function Write-Error {
+function Write-ErrorMessage {
     param([string]$Message)
-    Write-Host "  [✗] $Message" -ForegroundColor Red
+    Write-Host "  [ERROR] $Message" -ForegroundColor Red
 }
 
-# Check if running as Administrator
-function Test-Admin {
-    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
+# Check if current session has administrator privileges
+function Test-AdministratorPrivileges {
+    $currentIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($currentIdentity)
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-# Get latest release from GitHub
-function Get-LatestRelease {
-    Write-Step "Fetching latest release..."
+# Fetch latest release information from GitHub API
+function Get-LatestReleaseInfo {
+    Write-StatusMessage "Checking for latest release..."
     
-    $apiUrl = "https://api.github.com/repos/$RepoOwner/$RepoName/releases/latest"
+    $apiEndpoint = "https://api.github.com/repos/$script:GitHubOwner/$script:GitHubRepo/releases/latest"
     
-    try {
-        $release = Invoke-RestMethod -Uri $apiUrl -Headers @{
-            "Accept" = "application/vnd.github.v3+json"
-            "User-Agent" = "MeoBoost-Bootstrapper"
-        }
-        
-        $asset = $release.assets | Where-Object { $_.name -like "*.exe" } | Select-Object -First 1
-        
-        if (-not $asset) {
-            throw "No executable found in latest release"
-        }
-        
-        return @{
-            Version = $release.tag_name
-            DownloadUrl = $asset.browser_download_url
-            FileName = $asset.name
-        }
+    $response = Invoke-RestMethod -Uri $apiEndpoint -Method Get -Headers @{
+        "Accept" = "application/vnd.github.v3+json"
+        "User-Agent" = "MeoBoost-Launcher/1.1"
     }
-    catch {
-        throw "Failed to fetch release: $_"
+    
+    # Find the executable asset in the release
+    $executableAsset = $response.assets | Where-Object { $_.name -match '\.exe$' } | Select-Object -First 1
+    
+    if ($null -eq $executableAsset) {
+        throw "No executable file found in the latest release"
+    }
+    
+    return @{
+        TagName = $response.tag_name
+        DownloadUrl = $executableAsset.browser_download_url
+        AssetName = $executableAsset.name
+        AssetSize = $executableAsset.size
     }
 }
 
-# Download the executable
-function Get-MeoBoost {
-    param([string]$Url, [string]$Version)
+# Download MeoBoost executable from GitHub
+function Install-MeoBoostExecutable {
+    param(
+        [Parameter(Mandatory)]
+        [string]$DownloadUrl,
+        
+        [Parameter(Mandatory)]
+        [string]$Version
+    )
     
-    Write-Step "Downloading MeoBoost $Version..."
+    Write-StatusMessage "Downloading MeoBoost $Version..."
     
-    # Create install directory
-    if (-not (Test-Path $InstallDir)) {
-        New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
+    # Ensure install directory exists
+    if (-not (Test-Path $script:InstallDirectory)) {
+        New-Item -ItemType Directory -Path $script:InstallDirectory -Force | Out-Null
+        Write-StatusMessage "Created directory: $script:InstallDirectory"
     }
     
-    # Download
-    try {
-        Invoke-WebRequest -Uri $Url -OutFile $ExePath -UseBasicParsing
-        Write-Success "Downloaded successfully"
+    # Download the executable
+    Invoke-WebRequest -Uri $DownloadUrl -OutFile $script:ExecutablePath -UseBasicParsing
+    
+    # Verify file was downloaded
+    if (-not (Test-Path $script:ExecutablePath)) {
+        throw "Download failed - file not found after download"
     }
-    catch {
-        throw "Failed to download: $_"
-    }
+    
+    $fileInfo = Get-Item $script:ExecutablePath
+    Write-SuccessMessage "Downloaded successfully ($([math]::Round($fileInfo.Length / 1MB, 2)) MB)"
 }
 
-# Check if update is needed
-function Test-UpdateRequired {
-    param([string]$LatestVersion)
+# Check if an update is available
+function Test-UpdateAvailable {
+    param(
+        [Parameter(Mandatory)]
+        [string]$LatestVersion
+    )
     
-    if (-not (Test-Path $ExePath)) {
+    # Check if executable exists
+    if (-not (Test-Path $script:ExecutablePath)) {
         return $true
     }
     
-    $versionFile = "$InstallDir\version.txt"
-    if (-not (Test-Path $versionFile)) {
+    # Check if version file exists
+    if (-not (Test-Path $script:VersionFilePath)) {
         return $true
     }
     
-    $currentVersion = Get-Content $versionFile -Raw
-    return $currentVersion.Trim() -ne $LatestVersion
+    # Compare versions
+    $installedVersion = (Get-Content $script:VersionFilePath -Raw).Trim()
+    return $installedVersion -ne $LatestVersion
 }
 
-# Save version info
-function Save-Version {
-    param([string]$Version)
-    Set-Content -Path "$InstallDir\version.txt" -Value $Version
+# Save installed version to file
+function Save-InstalledVersion {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Version
+    )
+    Set-Content -Path $script:VersionFilePath -Value $Version -NoNewline
 }
 
-# Run MeoBoost
-function Start-MeoBoost {
-    Write-Step "Starting MeoBoost..."
+# Launch MeoBoost application
+function Start-MeoBoostApplication {
+    Write-StatusMessage "Launching MeoBoost..."
     
-    if (-not (Test-Path $ExePath)) {
-        throw "Executable not found at $ExePath"
+    if (-not (Test-Path $script:ExecutablePath)) {
+        throw "Application not found at: $script:ExecutablePath"
     }
     
-    # Run with admin privileges if not already admin
-    if (-not (Test-Admin)) {
-        Write-Step "Requesting Administrator privileges..."
-        Start-Process -FilePath $ExePath -Verb RunAs -Wait
+    # Launch with appropriate privileges
+    if (Test-AdministratorPrivileges) {
+        # Already running as admin
+        Start-Process -FilePath $script:ExecutablePath -Wait
     }
     else {
-        Start-Process -FilePath $ExePath -Wait
+        # Request elevation
+        Write-StatusMessage "Requesting administrator privileges..."
+        Start-Process -FilePath $script:ExecutablePath -Verb RunAs -Wait
     }
 }
 
-# Main execution
-function Main {
-    Write-Header
+# Main entry point
+function Invoke-MeoBoostLauncher {
+    Show-ApplicationHeader
     
     try {
-        # Get latest release info
-        $release = Get-LatestRelease
+        # Fetch latest release from GitHub
+        $releaseInfo = Get-LatestReleaseInfo
         
-        # Check if update needed
-        if (Test-UpdateRequired -LatestVersion $release.Version) {
-            Get-MeoBoost -Url $release.DownloadUrl -Version $release.Version
-            Save-Version -Version $release.Version
+        # Download if update available or not installed
+        if (Test-UpdateAvailable -LatestVersion $releaseInfo.TagName) {
+            Install-MeoBoostExecutable -DownloadUrl $releaseInfo.DownloadUrl -Version $releaseInfo.TagName
+            Save-InstalledVersion -Version $releaseInfo.TagName
+            Write-SuccessMessage "Installed version: $($releaseInfo.TagName)"
         }
         else {
-            Write-Success "Already up to date ($($release.Version))"
+            Write-SuccessMessage "Already running latest version ($($releaseInfo.TagName))"
         }
         
-        # Run the app
-        Start-MeoBoost
+        # Launch the application
+        Start-MeoBoostApplication
         
         Write-Host ""
-        Write-Success "MeoBoost closed."
+        Write-SuccessMessage "MeoBoost session ended."
         Write-Host ""
     }
     catch {
-        Write-Error $_.Exception.Message
+        Write-ErrorMessage $_.Exception.Message
         Write-Host ""
-        Write-Host "  Need help? Visit: https://github.com/$RepoOwner/$RepoName/issues" -ForegroundColor Gray
+        Write-Host "  For support, please visit:" -ForegroundColor Gray
+        Write-Host "  https://github.com/$script:GitHubOwner/$script:GitHubRepo/issues" -ForegroundColor Cyan
         Write-Host ""
         exit 1
     }
 }
 
-# Execute
-Main
+# Execute the launcher
+Invoke-MeoBoostLauncher

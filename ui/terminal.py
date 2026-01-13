@@ -4,6 +4,7 @@ MeoBoost Terminal UI - Full Mode
 
 import os
 import sys
+import subprocess
 
 from rich.console import Console
 from rich.table import Table
@@ -25,7 +26,11 @@ OK, WARN, ERR, DIM = "#00ff88", "#ffaa00", "#ff4444", "#555555"
 
 
 def cls():
-    os.system('cls' if os.name == 'nt' else 'clear')
+    # Clear screen using subprocess for security (avoid shell injection)
+    if os.name == 'nt':
+        subprocess.run(['cmd', '/c', 'cls'], shell=False, check=False)
+    else:
+        subprocess.run(['clear'], shell=False, check=False)
 
 
 def badge(on, na=False):
@@ -79,7 +84,8 @@ def inp():
     console.print()
     try:
         return console.input(f"[{C3}]▸[/] ").strip()
-    except:
+    except (KeyboardInterrupt, EOFError):
+        # Handle Ctrl+C and EOF gracefully - return exit command
         return "x"
 
 
@@ -568,7 +574,9 @@ def save_lang(lang):
         system.make_dir(DATA_DIR)
         with open(os.path.join(DATA_DIR, "language"), "w") as f:
             f.write(lang)
-    except:
+    except OSError:
+        # Language preference save failed - non-critical, continue silently
+        # Could occur if DATA_DIR is inaccessible or disk is full
         pass
 
 
@@ -578,7 +586,8 @@ def load_lang():
         if os.path.exists(p):
             with open(p) as f:
                 return f.read().strip()
-    except:
+    except OSError:
+        # Language preference load failed - non-critical, use system default
         pass
     return None
 

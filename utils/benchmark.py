@@ -58,7 +58,9 @@ def parse_score():
                     parts = last.split(',')
                     if len(parts) >= 4:
                         return int(parts[3])
-    except:
+    except (OSError, ValueError, IndexError):
+        # Score parsing failed - file access error or malformed CSV data
+        # Return 0 to indicate no valid score available
         pass
     return 0
 
@@ -70,7 +72,7 @@ def get_last_scores(count=5):
             with open(csv_path, 'r') as f:
                 lines = f.readlines()
                 for line in lines[-count:]:
-                    parts = line.strip().split(',')
+                    parts = line.strip().split(',')  
                     if len(parts) >= 4:
                         scores.append({
                             "date": parts[0] if parts else "",
@@ -78,6 +80,8 @@ def get_last_scores(count=5):
                             "resolution": parts[2] if len(parts) > 2 else "",
                             "score": int(parts[3]) if len(parts) > 3 else 0
                         })
-    except:
+    except (OSError, ValueError, IndexError):
+        # Score history retrieval failed - file access error or malformed data
+        # Return empty list to indicate no scores available
         pass
     return scores
