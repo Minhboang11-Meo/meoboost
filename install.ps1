@@ -75,21 +75,8 @@ if (-not (Test-Path $PyExe)) {
     Write-O "Using existing portable Python."
 }
 
-# 2. Install Dependencies
-# Note: When using embed python, pip module is in the script, so call differently
-$reqFile = Join-Path $Src "requirements.txt"
-if (Test-Path $reqFile) {
-    Write-S "Checking dependencies..."
-    # Call pip via module
-    & $PyExe -m pip install -r $reqFile -q --no-warn-script-location
-    Write-O "Dependencies installed."
-}
-
-# Download source (if not already there or update needed - simplified logic for now)
-# For this script, we assume source is managed by the caller or this script is part of it.
-# But based on previous logic, we might need to download source if missing.
-# Re-adding source download logic from previous version but adapted.
-
+# 2. Download Source Code
+# (Must be done before installing dependencies so requirements.txt exists)
 if (-not (Test-Path $Src)) {
     Write-S "Downloading source code..."
     if (-not (Test-Path $Dir)) { New-Item -ItemType Directory -Path $Dir -Force | Out-Null }
@@ -109,7 +96,17 @@ if (-not (Test-Path $Src)) {
     Write-O "Source code ready"
 }
 
-# 3. Run Tool
+# 3. Install Dependencies
+# Note: When using embed python, pip module is in the script, so call differently
+$reqFile = Join-Path $Src "requirements.txt"
+if (Test-Path $reqFile) {
+    Write-S "Checking dependencies..."
+    # Call pip via module
+    & $PyExe -m pip install -r $reqFile -q --no-warn-script-location
+    Write-O "Dependencies installed."
+}
+
+# 4. Run Tool
 Write-Host ""
 Write-S "Starting MeoBoost..."
 Write-Host ""
