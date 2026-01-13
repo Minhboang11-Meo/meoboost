@@ -5,15 +5,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from config import VERSION, APP_NAME
 
-BETA_MODE = "-beta" in sys.argv
-
 def main():
     print(f"{APP_NAME} v{VERSION}")
     print("Starting...")
     
     try:
         from ui.terminal import run
-        run(beta=BETA_MODE)
+        run()
     except KeyboardInterrupt:
         print("\nBye!")
     except Exception as ex:
@@ -24,4 +22,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
