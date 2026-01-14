@@ -1,5 +1,8 @@
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <p align="center">
+  <a href="https://www.patreon.com/cw/meohunter">
+    <img src="https://img.shields.io/badge/Patreon-Support-orange?style=for-the-badge&logo=patreon" alt="Patreon" />
+  </a>
   <img src="https://img.shields.io/badge/Windows-10%2F11-0078D6?style=for-the-badge&logo=windows" alt="Windows" />
   <img src="https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/License-GPL--3.0-blue?style=for-the-badge" alt="License" />
@@ -19,7 +22,8 @@
   <a href="#-features">Features</a> •
   <a href="#-quick-start">Quick Start</a> •
   <a href="#-security">Security</a> •
-  <a href="#-disclaimer">Disclaimer</a>
+  <a href="#-disclaimer">Disclaimer</a> •
+  <a href="#-support">Support</a>
 </p>
 
 ---
@@ -102,6 +106,7 @@ If you do not agree to these terms, please do not use MeoBoost.
 If you find **MeoBoost** useful, please consider supporting the project:
 
 - ⭐ **Star on GitHub**: Help others discover the project.
+- 🧡 **Patreon**: [Support me on Patreon](https://www.patreon.com/cw/meohunter)
 - ☕ **Donate**: Support the developer via **Techcombank** (`6668885688` - Nguyen Minh Tuan).
 - 💬 **Share**: Spread the word to your friends and communities.
 - 🐛 **Report Bugs**: [Open an issue](https://github.com/meohunterr/MeoBoost/issues) if you encounter problems.
